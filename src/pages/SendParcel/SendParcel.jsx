@@ -2,9 +2,11 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useLoaderData } from "react-router";
 import useAuth from "../../hooks/useAuth";
+import Swal from "sweetalert2";
 
 const SendParcel = () => {
   const { user } = useAuth();
+//   const [showWeight, setShowWeight] = useState(true);
   const {
     register,
     handleSubmit,
@@ -17,6 +19,7 @@ const SendParcel = () => {
   const region = [...new Set(regionDuplicate)];
   const senderRegion = watch("senderRegion");
   const receiverRegion = watch("receiverRegion");
+  const parcelTypee = watch("parcelType");
   const districtByRegion = (region) => {
     const regionDistricts = locationData.filter((c) => c.region === region);
     const districts = regionDistricts.map((d) => d.district);
@@ -27,25 +30,44 @@ const SendParcel = () => {
     // console.log(data);
     const isDocument = data.parcelType === "document";
     const isSameDistrict = data.senderDistrict === data.receiverDistrict;
-    const parcelWeight = parseFloat(data.parcelWeight)
+    const parcelWeight = parseFloat(data.parcelWeight);
 
     let cost = 0;
     if (isDocument) {
-        cost = isSameDistrict ? 60 : 80
-    }else{
-        if (parcelWeight <= 3) {
-            cost = isSameDistrict ? 110 : 150
-        }else{
-            const minCharge = isSameDistrict ? 110 : 150;
-            const extraWeight = parcelWeight - 3; 
-            const extraCharge = isSameDistrict ? extraWeight * 40 : extraWeight * 40 + 40;
+      cost = isSameDistrict ? 60 : 80;
+    } else {
+      if (parcelWeight <= 3) {
+        cost = isSameDistrict ? 110 : 150;
+      } else {
+        const minCharge = isSameDistrict ? 110 : 150;
+        const extraWeight = parcelWeight - 3;
+        const extraCharge = isSameDistrict
+          ? extraWeight * 40
+          : extraWeight * 40 + 40;
 
-            cost = minCharge + extraCharge
-        }
+        cost = minCharge + extraCharge;
+      }
     }
 
+    Swal.fire({
+      title: "Agree With the cost?",
+      text: `You will be charged ${cost} tk.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "I agree!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
+      }
+    });
+
     console.log(cost);
-    
   };
 
   return (
@@ -98,17 +120,21 @@ const SendParcel = () => {
               placeholder="Parcel Name"
             />
           </fieldset>
-          <fieldset className="fieldset">
-            <label className="label font-medium text-[#0F172A]">
-              Parcel Weight (KG)
-            </label>
-            <input
-              type="number"
-              {...register("parcelWeight", { required: true })}
-              className="input w-full"
-              placeholder="Parcel Weight (KG)"
-            />
-          </fieldset>
+          <div className="">
+            {parcelTypee === "non-document" && (
+              <fieldset className="fieldset">
+                <label className="label font-medium text-[#0F172A]">
+                  Parcel Weight (KG)
+                </label>
+                <input
+                  type="number"
+                  {...register("parcelWeight", { required: true })}
+                  className="input w-full"
+                  placeholder="Parcel Weight (KG)"
+                />
+              </fieldset>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
           {/* Sender */}
