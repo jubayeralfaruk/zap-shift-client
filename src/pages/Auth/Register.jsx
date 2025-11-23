@@ -13,7 +13,7 @@ const Register = () => {
   const handleRegistration = (data) => {    
     const photo = data.photo[0]
     registerUser(data.email, data.password)
-      .then(result => {
+      .then(() => {
         const formData = new FormData();
         formData.append("image", photo);
 

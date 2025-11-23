@@ -3,10 +3,13 @@ import { useForm } from "react-hook-form";
 import { useLoaderData } from "react-router";
 import useAuth from "../../hooks/useAuth";
 import Swal from "sweetalert2";
+import axios from "axios";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const SendParcel = () => {
   const { user } = useAuth();
-//   const [showWeight, setShowWeight] = useState(true);
+  const  axiosSecure = useAxiosSecure()
+  //   const [showWeight, setShowWeight] = useState(true);
   const {
     register,
     handleSubmit,
@@ -59,11 +62,21 @@ const SendParcel = () => {
       confirmButtonText: "I agree!",
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire({
-          title: "Deleted!",
-          text: "Your file has been deleted.",
+        const allData = {
+          ...data,
+          deliveryCost: cost,
+          senderEmail: user.email,
+        };
+        axiosSecure.post("/parcels", allData)
+        .then(data => {
+          console.log("after parcel send", data);
+          Swal.fire({
+          title: "Parcel!",
+          text: "Your parcel sended & status padding.",
           icon: "success",
         });
+          
+        })
       }
     });
 
@@ -78,7 +91,8 @@ const SendParcel = () => {
         </h1>
         <h4
           className="text-[min(5vw,28px)] font-extrabold
-                text-secondary border-b border-gray-200 pb-7 mb-7 ">
+                text-secondary border-b border-gray-200 pb-7 mb-7 "
+        >
           Enter your parcel details
         </h4>
       </div>
@@ -107,9 +121,7 @@ const SendParcel = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 border-b border-gray-200 pb-7 mb-7 gap-7">
           <fieldset className="fieldset">
-            <label
-              name="name"
-              className="label font-medium text-[#0F172A]">
+            <label name="name" className="label font-medium text-[#0F172A]">
               Parcel Name
             </label>
             <input
@@ -174,7 +186,8 @@ const SendParcel = () => {
               <select
                 defaultValue="Select Region"
                 {...register("senderRegion", { required: true })}
-                className="select w-full">
+                className="select w-full"
+              >
                 <option disabled={true}>Select Region</option>
                 {region.map((r, i) => (
                   <option key={i}>{r}</option>
@@ -189,7 +202,8 @@ const SendParcel = () => {
               <select
                 {...register("senderDistrict", { required: true })}
                 defaultValue="Select District"
-                className="select w-full">
+                className="select w-full"
+              >
                 <option disabled={true}>Select District</option>
                 {districtByRegion(senderRegion).map((d, i) => (
                   <option key={i}>{d}</option>
@@ -216,7 +230,8 @@ const SendParcel = () => {
               <textarea
                 {...register("senderPickupInstruction")}
                 className="textarea w-full"
-                placeholder="Pickup Instruction"></textarea>
+                placeholder="Pickup Instruction"
+              ></textarea>
             </fieldset>
           </div>
           {/* receiver*/}
@@ -256,7 +271,8 @@ const SendParcel = () => {
               <select
                 defaultValue="Select Region"
                 {...register("receiverRegion", { required: true })}
-                className="select w-full">
+                className="select w-full"
+              >
                 <option disabled={true}>Select Region</option>
                 {region.map((r, i) => (
                   <option key={i}>{r}</option>
@@ -271,7 +287,8 @@ const SendParcel = () => {
               <select
                 {...register("receiverDistrict", { required: true })}
                 defaultValue="Select District"
-                className="select w-full">
+                className="select w-full"
+              >
                 <option disabled={true}>Select District</option>
                 {districtByRegion(receiverRegion).map((d, i) => (
                   <option key={i}>{d}</option>
@@ -298,14 +315,13 @@ const SendParcel = () => {
               <textarea
                 {...register("receiverPickupInstruction")}
                 className="textarea w-full"
-                placeholder="Pickup Instruction"></textarea>
+                placeholder="Pickup Instruction"
+              ></textarea>
             </fieldset>
           </div>
         </div>
         <p className="my-12">* PickUp Time 4pm-7pm Approx.</p>
-        <button
-          type="submit"
-          className="btn bg-primary btn-wide font-semibold">
+        <button type="submit" className="btn bg-primary btn-wide font-semibold">
           Proceed to Confirm Booking
         </button>
       </form>
